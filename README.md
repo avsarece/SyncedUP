@@ -3,6 +3,7 @@ A song recommendation system.
 
 This recommendation system uses the dataset "https://www.kaggle.com/datasets/maharshipandya/-spotify-tracks-dataset" to find different artists, 
 and gets the 5 most popular songs from each artist using Genius API. 
+
 The similarity score is calculated as: 0.3 * genre_sim + 0.7 * lyrics_embedding_sim
 
 ### HOW TO RUN THIS PROJECT
