@@ -175,8 +175,7 @@ def query_to_qdrant(song_name: str, k_final: int):
     song_artist = song_row['artist'].values[0]
 
     embedding = model.encode(song_lyrics)
-    client = QdrantClient("localhost", port=6333)
-    search_result = client.search(
+    search_result = qdrant_client.search(
         collection_name="song_db",
         query_vector=embedding,
         query_filter=Filter(must_not=[FieldCondition(key="id", match=MatchValue(value=input_id)),
