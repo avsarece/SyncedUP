@@ -9,10 +9,14 @@ from qdrant_client.http.models import (
     MatchValue
 )
 from pathlib import Path
+import streamlit as st
 
 model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
-client = QdrantClient(url="http://localhost:6333")
+qdrant_client = QdrantClient(
+    url=st.secrets["QDRANT_URL"],
+    api_key=st.secrets["QDRANT_API_KEY"]
+)
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 csv_file = BASE_DIR / "data" / "allsonginfo.csv"  # Can change the csv_file path here
@@ -69,7 +73,7 @@ def unweighted_similarity(input_song: str) -> list[dict[str, str | int | float]]
     query_vec = model.encode([lyrics])[0].tolist()
     # quert_vec = transform_sentences()[1]
 
-    hits = client.search(
+    hits = qdrant_client.search(
         collection_name="song_db",
         query_vector=query_vec,
         query_filter=Filter(must_not=[FieldCondition(key="id", match=MatchValue(value=input_id))]),
@@ -131,7 +135,7 @@ def find_most_similar(input_song: str) -> list:
     lyrics = input_row["lyrics"].values[0]
     query_vec = model.encode([lyrics])[0].tolist()
 
-    hits = client.search(
+    hits = qdrant_client.search(
         collection_name="song_db",
         query_vector=query_vec,
         query_filter=Filter(must_not=[FieldCondition(key="id", match=MatchValue(value=input_id))]),
