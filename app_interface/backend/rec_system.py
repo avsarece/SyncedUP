@@ -177,12 +177,12 @@ def query_to_qdrant(song_name: str, k_final: int):
     embedding = model.encode(song_lyrics)
     search_result = qdrant_client.search(
         collection_name="song_db",
-        query_vector=embedding,
+        query_vector=embedding.tolist(),  # ← add .tolist()
         query_filter=Filter(must_not=[FieldCondition(key="id", match=MatchValue(value=input_id)),
                                       FieldCondition(key="artist", match=MatchValue(value=song_artist))]),
         with_payload=True,
-        score_threshold=0.4,
         limit=50
+        # ← remove score_threshold for now
     )
 
     rescored = []
