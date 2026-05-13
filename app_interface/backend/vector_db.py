@@ -7,14 +7,18 @@ from qdrant_client.http.models import PointStruct
 import nltk
 from pathlib import Path
 from torch import IntTensor
+import streamlit as st
 
 
 TOKENIZER = nltk.data.load('tokenizers/punkt/english.pickle')
 
 model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
 
-client = QdrantClient(url="http://localhost:6333")
-client.recreate_collection(
+qdrant_client = QdrantClient(
+    url=st.secrets["QDRANT_URL"],
+    api_key=st.secrets["QDRANT_API_KEY"]
+)
+qdrant_client.recreate_collection(
     collection_name="song_db",
     vectors_config=VectorParams(size=384, distance=Distance.DOT),
 )
@@ -117,18 +121,18 @@ def upload_to_qdrant(lyrics, embeddings, ids, genres, titles, artists,urls, batc
         ))
 
         if len(points) >= batch_size:
-            client.upsert(collection_name="song_db", wait=True, points=points)
+            qdrant_client.upsert(collection_name="song_db", wait=True, points=points)
             points = []
 
     if points:
-        client.upsert(collection_name="song_db", wait=True, points=points)
+        qdrant_client.upsert(collection_name="song_db", wait=True, points=points)
 
 
 lyrics, embeddings, ids, genres, titles, artists, urls = transform_sentences()
 upload_to_qdrant(lyrics, embeddings, ids, genres, titles, artists, urls)
 
 # Retract first 15 data from collection
-points, next_page = client.scroll(
+points, next_page = qdrant_client.scroll(
     collection_name="song_db",
     limit=15,
     with_payload=True,  # Also include other metadata
